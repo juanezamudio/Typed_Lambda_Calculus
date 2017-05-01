@@ -4,8 +4,8 @@ module Syntax where
 
 import Control.Applicative
 import Data.Char
-import Data.Map (Map)
-import qualified Data.Map as Map
+--import Data.Map (Map)
+--import qualified Data.Map as Map
 
 type VarName = String
 
@@ -27,10 +27,7 @@ data Exp =
 
 
 data Unop = Neg | Not | Fst | Snd
-
-data TypeError = ExpectedFunction Exp Type
-               | Mismatch Exp Type Type {- expression, got, expected -}
-               | UnboundVariable VarName deriving Show
+            deriving (Eq, Show)
 
 
 --instance Show Exp where
@@ -113,7 +110,8 @@ parens :: Parser a -> Parser a
 parens p = (char '(' *> p) <* char ')'
 
 keywords :: [String]
-keywords = ["let","in","lambda", "true", "false", "if", "else", "then", "rec"]
+keywords = ["let", "in", "lambda", "true", "false", "if", "else", "then", "rec", "and",
+            "or", "not", "fst", "snd"]
 
 notKeyword :: String -> Bool
 notKeyword = not . (`elem` keywords)
@@ -140,7 +138,11 @@ chainl1 p sep = foldl (\acc (op,v) -> op acc v) <$>
                 p <*> many ((\op v -> (op,v)) <$> sep <*> p)
 
 lcSyntax :: Parser Exp
-lcSyntax = (lcExp `chainl1` (pure Apply)) <* ws
+lcSyntax =     Unop <$> pure Neg <* char '-'  <*> lcExp
+           <|> Unop <$> pure Not <* str "not" <*> lcExp
+           <|> Unop <$> pure Fst <* str "fst" <*> lcExp
+           <|> Unop <$> pure Snd <* str "snd" <*> lcExp
+           <|> (lcExp `chainl1` (pure Apply))
 
 lcType :: Parser Type
 lcType =     TFun <$> lcType' <* str "->" <*> lcType
@@ -164,7 +166,7 @@ lcExp =     parens lcSyntax
         <|> Var <$> var
         <|> Bool <$> bool
         <|> Type <$> (char '(' *> lcSyntax) <* char ':' <*> lcType <* char ')'
-        <|> Int <$> int
+        <|> Int <$> (ws *> int)
         <|> Tuple <$> (char '(' *> lcSyntax) <* char ',' <*> lcSyntax <* char ')'
         <|> If <$> (str "if" *> lcSyntax) <* str "then" <*> lcSyntax <* str "else" <*> lcSyntax 
 

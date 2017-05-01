@@ -54,5 +54,5 @@ main = do
       Left e -> die e
       Right x -> if Unsafe `elem` as then print $ interp x
                  else case check x of
-                        Left e -> die e
+                        Left e -> die (show e)
                         Right _ -> print $ interp x
