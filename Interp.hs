@@ -12,7 +12,7 @@ interp (Apply e1 e2) = do
     e2' <- interp e2
     case e1' of
         Lambda v _ e -> interp (bSub v e2' e)
-        e -> Left $ "Applied non-function." ++ (show e)
+        e -> Left $ "Applied non-function : " ++ (show e)
 interp (Let v e1 e2) = interp (bSub v e1 e2)
 interp (LetRec v t e1 e2) = interp (bSub v (LetRec v t e1 (Var v)) (bSub v e1 e2))
 interp (Lambda v t e) = return $ Lambda v t e
@@ -27,7 +27,7 @@ interp (If e1 e2 e3) = do
     case e1' of
         Bool True -> interp e2
         Bool False -> interp e3 
-        _ -> Left "Expect bool in if statement"
+        _ -> Left "Expected bool in if statement"
 interp (Type e _) = interp e
 interp (Unop Neg e) = do
     e' <- interp e
@@ -58,14 +58,14 @@ interp (Binop binop e1 e2) | binop `elem` boolOps = do
     e2' <- interp e2
     case (e1', e2') of
         (Bool b1, Bool b2) -> return $ Bool $ (boolOpLookup binop) b1 b2
-        _ -> Left $ "Cannot operate " ++ (show binop) ++ "on non-booleans"
+        _ -> Left $ "Cannot operate " ++ (show binop) ++ " on non-booleans"
 interp (Binop binop e1 e2) = do -- must take two ints
     e1' <- interp e1
     e2' <- interp e2
     case (e1', e2') of
         (Int a, Int b) -> if binop == Lt then return $ Bool (a < b)
                               else return $ Int $ (numOpLookup binop) a b
-        _ -> Left $ "Cannot operate " ++ (show binop) ++ "on non-ints"
+        _ -> Left $ "Cannot operate " ++ (show binop) ++ " on non-ints"
 
 
 boolOpLookup :: Binop -> (Bool -> Bool -> Bool)

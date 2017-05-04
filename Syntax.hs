@@ -24,7 +24,7 @@ data Exp =
   | If Exp Exp Exp
   | Unop Unop Exp
   | Binop Binop Exp Exp
-  deriving (Eq, Show)
+  deriving (Eq)
 
 
 data Unop = Neg | Not | Fst | Snd
@@ -35,8 +35,8 @@ data Binop = Times | Div | Plus | Sub | And | Or | Equal | Lt
 
 
 
---instance Show Exp where
---  show = showExp
+instance Show Exp where
+ show = showExp
 
 -- TODO: improve show
 showExp :: Exp -> String
