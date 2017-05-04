@@ -50,7 +50,6 @@ showExp (Lambda v t e) = "lambda " ++ v ++ " : " ++ showType t ++ ". " ++ showEx
 showExp (Let v e1 e2) = "let " ++ v ++ " = " ++ show e1 ++ " in \n" ++ show e2
 showExp (Bool b) = if b then "true" else "false"
 showExp (LetRec v t e1 e2) = "let " ++ "rec" ++ v ++ ":" ++ showType t ++ "=" ++ show e1 ++ " in \n" ++ show e2
-
 showExp (Int v) = show v --good
 showExp (Type e t) = "(" ++ showExp e ++ " : " ++ showType t ++ ")" --good
 showExp (Tuple e1 e2) = "(" ++ showExp e1 ++ ", " ++ showExp e2 ++ ")" --good
