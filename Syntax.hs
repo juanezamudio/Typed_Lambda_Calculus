@@ -46,9 +46,34 @@ showExp (Apply (Var v) e2) = v ++ " (" ++ show e2 ++ ")"
 showExp (Apply e1 (Var v)) = "(" ++ show e1 ++ ") " ++ v
 showExp (Apply e1 e2) = show e1 ++ " (" ++ show e2 ++ ")"
 --showExp (Lambda v t (Lambda v' t' e)) = "lambda " ++ v ++ " " ++ v' ++ ". " ++ show e
-showExp (Lambda v t e) = "lambda " ++ v ++ ":" ++ show t ++ ". " ++ show e
+showExp (Lambda v t e) = "lambda " ++ v ++ " : " ++ showType t ++ ". " ++ showExp e
 showExp (Let v e1 e2) = "let " ++ v ++ " = " ++ show e1 ++ " in \n" ++ show e2
 showExp (Bool b) = if b then "true" else "false"
+showExp (LetRec v t e1 e2) = "let " ++ "rec" ++ v ++ ":" ++ showType t ++ "=" ++ show e1 ++ " in \n" ++ show e2
+
+showExp (Int v) = show v --good
+showExp (Type e t) = "(" ++ showExp e ++ " : " ++ showType t ++ ")" --good
+showExp (Tuple e1 e2) = "(" ++ showExp e1 ++ ", " ++ showExp e2 ++ ")" --good
+showExp (If e1 e2 e3) = "if " ++ showExp e1 ++ " then " ++ showExp e2 ++ " else " ++ showExp e3 --good
+showExp (Unop Neg e) = "-" ++ showExp e --good
+showExp (Unop Not e) = "not " ++ showExp e --good
+showExp (Unop Fst e) = "fst " ++ showExp e --good
+showExp (Unop Snd e) = "snd " ++ showExp e --good
+showExp (Binop Times e1 e2) = showExp e1 ++ " * " ++ showExp e2 --good
+showExp (Binop Div e1 e2) = showExp e1 ++ " / " ++ showExp e2
+showExp (Binop Plus e1 e2) = showExp e1 ++ " + " ++ showExp e2
+showExp (Binop Sub e1 e2) = showExp e1 ++ " - " ++ showExp e2
+showExp (Binop And e1 e2) = showExp e1 ++ " and " ++ showExp e2 --good
+showExp (Binop Or e1 e2) = showExp e1 ++ " or " ++ showExp e2
+showExp (Binop Equal e1 e2) = showExp e1 ++ " == " ++ showExp e2
+showExp (Binop Lt e1 e2) = showExp e1 ++ " < " ++ showExp e2
+
+showType :: Type -> String
+showType TInt = "int"
+showType TBool = "bool"
+showType (TFun t1 t2) = showType t1 ++ " -> " ++ showType t2
+showType (TTuple t1 t2) = "(" ++ showType t1 ++ "," ++ showType t2
+
 
 newtype Parser a = Parser { parse :: String -> Maybe (a,String) }
 
@@ -167,6 +192,7 @@ gt a b = Binop Lt b a
 le a b = Unop Not (Binop Lt b a)
 ge a b = Unop Not (Binop Lt a b)
 
+lcSyntax :: Parser Exp
 lcSyntax =    LetRec <$> (str "let" *> str "rec" *> var) <* char ':' <*> lcType
                    <* char '=' <*> lcBinop <* str "in" <*> lcSyntax
           <|> Let <$> (str "let" *> var) <*> ((flip Type) <$> lcType <* char '=' 

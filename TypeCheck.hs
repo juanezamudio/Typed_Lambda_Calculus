@@ -97,5 +97,6 @@ typeOf g (LetRec v t e1 e2) = do
       _ -> Left $ ExpectedFunction e1 t1
   else Left $ Mismatch e1 t1 t
 
+numOps, boolOps :: [Binop]
 numOps = [Times, Div, Plus, Sub, Lt]
 boolOps = [And, Or]
