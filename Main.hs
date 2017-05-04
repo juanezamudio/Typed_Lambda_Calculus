@@ -1,9 +1,5 @@
 {-# OPTIONS_GHC -Wall #-}
 
-import Prelude hiding (succ, pred, fst, snd)
---import Data.Map (Map)
---import qualified Data.Map as Map
-
 import System.Environment
 import System.Exit
 import System.IO
@@ -13,11 +9,6 @@ import Syntax
 import TypeCheck
 import Interp
 import Test
---type Store = Map VarName Exp
-
---update :: VarName -> Exp -> Store -> Store
---update v n st = Map.insert v n st
-
 
 data Flag = Unsafe               -- -u
           | Help                 -- --help
@@ -53,6 +44,6 @@ main = do
     case tryParse lcSyntax content of
       Left e -> die e
       Right x -> if Unsafe `elem` as then print $ interp x
-                 else case check x of
-                        Left e -> die (show e)
+                 else case checkType x of
+                        Left e' -> die (show e')
                         Right _ -> print $ interp x

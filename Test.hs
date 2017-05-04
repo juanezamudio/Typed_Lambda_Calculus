@@ -2,6 +2,7 @@
 module Test where
 import Syntax
 import TypeCheck
+import Interp
 
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -17,10 +18,35 @@ lcProg7 = "(lambda x:bool. x) 1" -- mismatch
 lcProg8 = "(lambda x:bool->bool. x) (lambda x:bool.x)" -- function
 lcProg9 = "(lambda x:bool->bool. x) (lambda x:bool->bool.x)" -- mismatch
 lcProg10 = "(lambda x:bool->bool. x) 1" -- mismatch
---lcProg11 = "lambda x:bool. x"
---lcProg12 = "lambda x:bool. x"
---lcProg12 = "lambda x:bool. x"
---lcProg13 = "lambda x:bool. x"
+lcProg11 = "if true then 1 else 2"
+lcProg12 = "if (lambda x:bool.x) true then 1 else 2"
+lcProg13 = "if true then 1 else true" -- should this program run?
+lcProg14 = "not true"
+lcProg15 = "if not false then 1 else 2"
+lcProg16 = "if true then -1 else 1"
+lcProg17 = "fst (1,2)"
+lcProg18 = "snd (1,2)"
+lcProg19 = "fst ((lambda x:(int, bool). x) (1,true))"
+lcProg20 = "snd ((lambda x:(int, bool). x) (1,true))"
+lcProg21 = "true or false"
+lcProg22 = "true and false"
+lcProg23 = "1==2"
+lcProg24 = "1<=2"
+lcProg25 = "1>=2"
+lcProg25' = "1 >= 2"
+lcProg26 = "1 < 2"
+lcProg27 = "lambda x:int. x > 2"
+lcProg28 = "(lambda x:int. x) 2 == 2"
+lcProg29 = "1 + 1"
+--lcProg26 = ""
+--lcProg26 = ""
+--lcProg26 = ""
+--lcProg26 = ""
+--lcProg26 = ""
+--lcProg26 = ""
+--lcProg26 = ""
+--lcProg26 = ""
+--lcProg26 = ""
 
 testTypeChecker :: String -> Either String Type
 testTypeChecker s = case parseLC s of 
@@ -28,6 +54,11 @@ testTypeChecker s = case parseLC s of
                         Right x -> case typeOf Map.empty x of 
                                     Left e' -> Left (show e')
                                     Right t -> Right t
+
+testInterp :: String -> Either String Exp
+testInterp s = do
+    parsed <- parseLC s
+    interp parsed
 
 --t ::= int | bool | t1 -> t2 | (t1,t2)
 --e ::= x | e1 e2 | lambda x : t. e
