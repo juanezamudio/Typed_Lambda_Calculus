@@ -8,7 +8,6 @@ import System.Console.GetOpt
 import Syntax
 import TypeCheck
 import Interp
-import Test
 
 data Flag = Unsafe               -- -u
           | Help                 -- --help
