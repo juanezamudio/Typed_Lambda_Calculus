@@ -43,7 +43,12 @@ main = do
     content <- if head fs == "-" then getContents else readFile (head fs)
     case tryParse lcSyntax content of
       Left e -> die e
-      Right x -> if Unsafe `elem` as then print $ interp x
+      Right x -> if Unsafe `elem` as then
+                    case interp x of
+                        Left e' -> die (show e')
+                        Right e' -> print e'
                  else case checkType x of
                         Left e' -> die (show e')
-                        Right _ -> print $ interp x
+                        Right _ -> case interp x of
+                                    Left e' -> die (show e')
+                                    Right e' -> print e'

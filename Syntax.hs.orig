@@ -36,7 +36,11 @@ data Binop = Times | Div | Plus | Sub | And | Or | Equal | Lt
 
 
 instance Show Exp where
+<<<<<<< HEAD
+ show = showExp
+=======
   show = showExp
+>>>>>>> c558555c3a3131404a63086f6fca875fc017f9f3
 
 -- TODO: improve show
 showExp :: Exp -> String

@@ -14,7 +14,8 @@ interp (Apply e1 e2) = do
         Lambda v _ e -> interp (bSub v e2' e)
         e -> Left $ "Applied non-function : " ++ (show e)
 interp (Let v e1 e2) = interp (bSub v e1 e2)
-interp (LetRec v t e1 e2) = interp (bSub v (LetRec v t e1 (Var v)) (bSub v e1 e2))
+interp (LetRec v (TFun t1 t2) e1 e2) = interp (bSub v (LetRec v (TFun t1 t2) e1 (Var v)) (bSub v e1 e2))
+interp (LetRec _ t _ _) = Left $ "Needs recursive function, got: " ++ (show t)
 interp (Lambda v t e) = return $ Lambda v t e
 interp (Bool b) = return $ Bool b
 interp (Int n) = return $ Int n
