@@ -24,7 +24,7 @@ data Exp =
   | If Exp Exp Exp
   | Unop Unop Exp
   | Binop Binop Exp Exp
-  deriving (Eq, Show)
+  deriving (Eq)
 
 
 data Unop = Neg | Not | Fst | Snd
@@ -35,8 +35,8 @@ data Binop = Times | Div | Plus | Sub | And | Or | Equal | Lt
 
 
 
---instance Show Exp where
---  show = showExp
+instance Show Exp where
+  show = showExp
 
 -- TODO: improve show
 showExp :: Exp -> String
@@ -195,13 +195,11 @@ ge a b = Unop Not (Binop Lt a b)
 lcSyntax :: Parser Exp
 lcSyntax =    LetRec <$> (str "let" *> str "rec" *> var) <* char ':' <*> lcType
                    <* char '=' <*> lcBinop <* str "in" <*> lcSyntax
-          <|> Let <$> (str "let" *> var) <*> ((flip Type) <$> lcType <* char '=' 
+          <|> Let <$> (str "let" *> var) <* char ':' <*> ((flip Type) <$> lcType <* char '=' 
                 <*> lcBinop) <* str "in" <*> lcSyntax
           <|> Let <$> (str "let" *> var) <* char '=' <*> lcBinop <* str "in" 
                 <*> lcSyntax
-          <|> If <$> (str "if" *> lcBinop) <* str "then" <*> lcBinop 
-               <* str "else" <*> lcBinop
-          <|> lcBinop
+          <|> lcBinop <* ws
 
 lcBinop, lcBinop', lcBinop'' :: Parser Exp
 lcBinop =   Binop Equal <$> lcBinop' <* beq <*> lcBinop
@@ -239,6 +237,8 @@ lcExp =     parens lcSyntax
         <|> Int <$> (ws *> int)
         <|> Type <$> (char '(' *> lcSyntax) <* char ':' <*> lcType <* char ')'
         <|> Tuple <$> (char '(' *> lcSyntax) <* char ',' <*> lcSyntax <* char ')'
+        <|> If <$> (str "if" *> lcSyntax) <* str "then" <*> lcSyntax
+               <* str "else" <*> lcSyntax
 
 lcLamda :: Parser Exp
 lcLamda =    Lambda <$> (char '(' *> var) <* char ':' <*> lcType <* char ')' <*> lcLamda

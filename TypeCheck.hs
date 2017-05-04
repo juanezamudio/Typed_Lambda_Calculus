@@ -10,6 +10,7 @@ type Context = Map VarName Type
 
 
 data TypeError =  ExpectedFunction Exp Type
+                | ExpectedNonFunction Exp
                 | ExpectedTuple Exp Type
                 | Mismatch Exp Type Type {- expression, got, expected -}
                 | BinopMismatch Exp Type Type Type {- expression, got 1, got 2, expected -}
@@ -74,7 +75,11 @@ typeOf g (If e1 e2 e3) = do
 typeOf g (Binop Equal e1 e2) = do 
   t1 <- typeOf g e1
   t2 <- typeOf g e2
-  if t1 == t2 then return TBool else Left $ Mismatch e2 t2 t1
+  if t1 == t2 
+  then case t1 of
+    (TFun _ _) -> Left $ ExpectedNonFunction e1
+    _ -> return TBool
+  else Left $ Mismatch e2 t2 t1
 typeOf g e@(Binop b e1 e2) | b `elem` numOps = do
   t1 <- typeOf g e1
   t2 <- typeOf g e2
@@ -88,13 +93,14 @@ typeOf g e@(Binop _ e1 e2) = do
   else Left $ BinopMismatch e t1 t2 TBool
 typeOf g (Let v e1 e2) = do
   t1 <- typeOf g e1
-  typeOf (Map.insert v t1 g) e2
+  t2 <- typeOf (Map.insert v t1 g) e2
+  return t2
 typeOf g (LetRec v t e1 e2) = do
   t1 <- typeOf (Map.insert v t g) e1
-  if t == t1 then 
-    case t1 of
-      (TFun _ _) -> typeOf (Map.insert v t g) e2
-      _ -> Left $ ExpectedFunction e1 t1
+  if t == t1
+  then case t1 of
+        (TFun _ _) -> typeOf (Map.insert v t g) e2
+        _ -> Left $ ExpectedFunction e1 t1
   else Left $ Mismatch e1 t1 t
 
 numOps, boolOps :: [Binop]
